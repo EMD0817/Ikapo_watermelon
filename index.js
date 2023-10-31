@@ -300,13 +300,20 @@
   function refreshLoop() {
     window.requestAnimationFrame(() => {
       const now = performance.now();
-      while (times.length > 0 && times[0] <= now - 1000) {
+      while (getFramerate() > 0 && times[0] <= now - 1000) {
         times.shift();
       }
       times.push(now);
-      fps = times.length;
+      fps = getFramerate();
       refreshLoop();
     });
+  }
+
+  function getFramerate() {
+    let len = times.length;
+    if (len > 60) len = 60;
+    console.log(len);
+    return len;
   }
 
   function isMobile() {
