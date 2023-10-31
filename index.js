@@ -309,12 +309,44 @@
     });
   }
 
+
   function getFramerate() {
     let len = times.length;
-    if (len > 60) len = 60;
+    len = getRefreshRate(times);
+    //if (len > 60) len = 60;
     console.log(len);
     return len;
   }
+
+  function getRefreshRate() {
+    var refreshRate = 60;
+    var startTime;
+    var count = 0;
+
+    function countFrames(timestamp) {
+        if (!startTime) {
+            startTime = timestamp;
+        }
+
+        count++;
+
+        var elapsed = timestamp - startTime;
+
+        if (elapsed < 1000) {
+            window.requestAnimationFrame(countFrames);
+        } else {
+            refreshRate = Math.round(1000 * count / elapsed);
+            if (isNaN(refreshRate)) {
+                console.log("function getRefreshRate() is failed");
+                refreshRate = 60;
+            }
+        }
+    }
+
+    window.requestAnimationFrame(countFrames);
+
+    return refreshRate;
+}
 
   function isMobile() {
     return window.innerHeight / window.innerWidth >= 1.49;
