@@ -33,6 +33,7 @@
   let isClicking = false;
   let isMouseOver = false;
   let newSize = 1;
+  let nextSize = Math.ceil(Math.random() * 3);  // ネクストの実装にはこの値を使います
 
   let isGameOver = false;
   let score = 0;
@@ -107,7 +108,7 @@
       Body.setVelocity(ball, { x: 0, y: (100 / fps) * 5.5 });
       ball = null;
 
-      newSize = Math.ceil(Math.random() * 3);
+      newSize = getNextBall();
 
       setTimeout(() => createNewBall(newSize), 500);
     }
@@ -139,11 +140,19 @@
       Body.setVelocity(ball, { x: 0, y: (100 / fps) * 5.5 });
       ball = null;
 
-      newSize = Math.ceil(Math.random() * 3);
-
+      newSize = getNextBall();
       setTimeout(() => createNewBall(newSize), 500);
     }
   });
+
+  function getNextBall(){
+    let nextBall = nextSize;
+    // 次のフルーツはここで決まります。1~3のランダムな数字が入ります。
+    nextSize = Math.ceil(Math.random() * 3);
+    // nextSize = 7;  // テスト用
+    console.log("次のフルーツは" + nextBall + "です。");
+    return nextBall;
+  }
 
   canvas.addEventListener("mouseover", () => {
     isMouseOver = true;
@@ -192,6 +201,8 @@
           Math.abs(body.velocity.x) < 0.5 &&
           Math.abs(body.velocity.y) < 0.5
         ) {
+          // ゲームオーバー寸前の時の処理はここに記述されています。これは画面更新の度にコールされます。
+          console.log("ゲームオーバー寸前");
           isLineEnable = true;
         }
       }
@@ -211,6 +222,8 @@
 
       if (bodies[0].size === bodies[1].size) {
         allBodies = Composite.allBodies(engine.world);
+        // ここで同じサイズのフルーツが衝突した時の処理を記述します。
+        console.log(bodies[0].size + ", " + bodies[1].size + "が衝突しました。");
         if (allBodies.includes(bodies[0]) && allBodies.includes(bodies[1])) {
           if (
             (Date.now() - bodies[0].createdAt < 100 ||
