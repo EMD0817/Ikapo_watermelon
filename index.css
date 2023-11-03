@@ -66,6 +66,25 @@ button * {
   border-radius: 0 0 25px 25px;
 }
 
+#nextFruitsText {
+  font-size: 20px;
+  font-weight: bolder;
+  position: relative;
+  display: inline-block;
+  vertical-align: middle;
+  top: 10px;
+  right: -5px;
+  -webkit-text-stroke: 1px #000;
+}
+
+#nextFruitsImage {
+  top: 10px;
+  display: inline-block;
+  height: 40px;
+  vertical-align: middle;
+  position: relative; /* Added to enable the use of the 'top' property */
+}
+
 #overlay {
   width: 480px;
   height: 700px;

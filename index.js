@@ -11,6 +11,8 @@
   const canvas = document.getElementById("canvas");
   var gameOverlayer = document.getElementById("overlay");
   const floor = document.getElementById("floor");
+  const nextFruitsText = document.getElementById("nextFruitsText");
+  const nextFruitsImage = document.getElementById("nextFruitsImage");
 
   const ctx = canvas.getContext("2d");
 
@@ -33,7 +35,7 @@
   let isClicking = false;
   let isMouseOver = false;
   let newSize = 1;
-  let nextSize = Math.ceil(Math.random() * 3);  // ネクストの実装にはこの値を使います
+  let nextSize = Math.ceil(Math.random() * 3);  // ネクストの実装にはこの変数を使います
 
   let isGameOver = false;
   let score = 0;
@@ -108,7 +110,7 @@
       Body.setVelocity(ball, { x: 0, y: (100 / fps) * 5.5 });
       ball = null;
 
-      newSize = getNextBall();
+      newSize = nextBall();
 
       setTimeout(() => createNewBall(newSize), 500);
     }
@@ -140,12 +142,12 @@
       Body.setVelocity(ball, { x: 0, y: (100 / fps) * 5.5 });
       ball = null;
 
-      newSize = getNextBall();
+      newSize = nextBall();
       setTimeout(() => createNewBall(newSize), 500);
     }
   });
 
-  function getNextBall(){
+  function nextBall(){
     let nextBall = nextSize;
     // 次のフルーツはここで決まります。1~3のランダムな数字が入ります。
     nextSize = Math.ceil(Math.random() * 3);
@@ -264,7 +266,7 @@
       writeText("Game Over", "center", 240, 280, 50);
       writeText("Score: " + score, "center", 240, 320, 30);
     } else {
-      writeText(score, "start", 25, 60, 40);
+      writeText(score, "start", 25, 40, 40);
 
       if (isLineEnable) {
         ctx.strokeStyle = "#f55";
@@ -274,6 +276,8 @@
         ctx.stroke();
       }
     }
+    //writeText("つぎは：" + nextSize, "start", 25, 720, 20)
+    nextFruitsImage.src = "assets/img/" + nextSize + ".png";
   });
 
   function writeText(text, textAlign, x, y, size) {
