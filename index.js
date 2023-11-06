@@ -93,27 +93,57 @@
 
     isClicking = false;
   });
+  function handleBallInteraction() {
+    if (isGameOver || ball == null) return;
+
+    ball.createdAt = 0;
+    ball.collisionFilter = {
+      group: 0,
+      category: 1,
+      mask: -1,
+    };
+    Body.setVelocity(ball, { x: 0, y: (100 / fps) * 5.5 });
+    ball = null;
+
+    nextFruitsImage.src = "assets/img/" + nextSize + ".png";
+    const nextFruitsImage_style_top = 10;
+    let maxHeight = parseInt(floor.style.height, nextFruitsImage_style_top) - nextFruitsImage_style_top;
+
+    if (nextSize * 20 <= maxHeight) {
+      nextFruitsImage.style.height = nextSize * 20 + "px";
+    } else {
+      nextFruitsImage.style.height = maxHeight + "px";
+    }
+    
+    newSize = nextBall();
+    addAnimationToNextFruitsImage();
+
+    setTimeout(() => createNewBall(newSize), 500);
+  }
+
+  function addAnimationToNextFruitsImage() {
+    if (!nextFruitsImage) return void 0;
+
+    // Reset the animation
+    nextFruitsImage.style.animation = 'none';
+    // Force a reflow, flushing the CSS changes
+    nextFruitsImage.offsetHeight; // jshint ignore:line
+    // Re-add the animation
+    nextFruitsImage.style.animation = "bounceAndGrow 0.3s";
+
+    // Reset the animation
+    floor.style.animation = 'none';
+    // Force a reflow, flushing the CSS changes
+    floor.offsetHeight; // jshint ignore:line
+    // Re-add the animation
+    floor.style.animation = "changeBackground 0.3s";
+  }
+
   addEventListener("touchend", () => {
     if (isGameOver) return;
 
     isClicking = false;
-
-    if (isGameOver) return;
-
-    if (ball != null) {
-      ball.createdAt = 0;
-      ball.collisionFilter = {
-        group: 0,
-        category: 1,
-        mask: -1,
-      };
-      Body.setVelocity(ball, { x: 0, y: (100 / fps) * 5.5 });
-      ball = null;
-
-      newSize = nextBall();
-
-      setTimeout(() => createNewBall(newSize), 500);
-    }
+    handleBallInteraction();
   });
 
   addEventListener("mousemove", (e) => {
@@ -122,6 +152,7 @@
     const rect = canvas.getBoundingClientRect();
     mousePos = e.clientX / parent.style.zoom - rect.left;
   });
+
   addEventListener("touchmove", (e) => {
     if (isGameOver) return;
 
@@ -130,24 +161,12 @@
   });
 
   addEventListener("click", () => {
-    if (isGameOver || !isMouseOver) return;
+    if (!isMouseOver) return;
 
-    if (ball != null) {
-      ball.createdAt = 0;
-      ball.collisionFilter = {
-        group: 0,
-        category: 1,
-        mask: -1,
-      };
-      Body.setVelocity(ball, { x: 0, y: (100 / fps) * 5.5 });
-      ball = null;
-
-      newSize = nextBall();
-      setTimeout(() => createNewBall(newSize), 500);
-    }
+    handleBallInteraction();
   });
 
-  function nextBall(){
+  function nextBall() {
     let nextBall = nextSize;
     // 次のフルーツはここで決まります。1~3のランダムな数字が入ります。
     nextSize = Math.ceil(Math.random() * 3);
@@ -277,7 +296,7 @@
       }
     }
     //writeText("つぎは：" + nextSize, "start", 25, 720, 20)
-    nextFruitsImage.src = "assets/img/" + nextSize + ".png";
+
   });
 
   function writeText(text, textAlign, x, y, size) {
@@ -300,10 +319,9 @@
       parent.style.zoom = window.innerWidth / 480;
       parent.style.top = "0px";
 
-      floor.style.height = `${
-        (window.innerHeight - canvas.height * parent.style.zoom) /
+      floor.style.height = `${(window.innerHeight - canvas.height * parent.style.zoom) /
         parent.style.zoom
-      }px`;
+        }px`;
     } else {
       parent.style.zoom = window.innerHeight / 720 / 1.3;
       parent.style.top = `${(canvas.height * parent.style.zoom) / 15}px`;
