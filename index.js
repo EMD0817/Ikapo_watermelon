@@ -105,6 +105,7 @@
     Body.setVelocity(ball, { x: 0, y: (100 / fps) * 5.5 });
     ball = null;
 
+    newSize = nextBall();
     nextFruitsImage.src = "assets/img/" + nextSize + ".png";
     const nextFruitsImage_style_top = 10;
     let maxHeight = parseInt(floor.style.height, nextFruitsImage_style_top) - nextFruitsImage_style_top;
@@ -114,8 +115,7 @@
     } else {
       nextFruitsImage.style.height = maxHeight + "px";
     }
-    
-    newSize = nextBall();
+
     addAnimationToNextFruitsImage();
 
     setTimeout(() => createNewBall(newSize), 500);
