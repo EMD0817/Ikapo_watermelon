@@ -11,6 +11,8 @@
   const canvas = document.getElementById("canvas");
   var gameOverlayer = document.getElementById("overlay");
   const floor = document.getElementById("floor");
+  const nextFruitsText = document.getElementById("nextFruitsText");
+  const nextFruitsImage = document.getElementById("nextFruitsImage");
 
   const ctx = canvas.getContext("2d");
 
@@ -33,6 +35,7 @@
   let isClicking = false;
   let isMouseOver = false;
   let newSize = 1;
+  let nextSize = Math.ceil(Math.random() * 3);  // ネクストの実装にはこの変数を使います
 
   let isGameOver = false;
   let score = 0;
@@ -90,27 +93,57 @@
 
     isClicking = false;
   });
+  function handleBallInteraction() {
+    if (isGameOver || ball == null) return;
+
+    ball.createdAt = 0;
+    ball.collisionFilter = {
+      group: 0,
+      category: 1,
+      mask: -1,
+    };
+    Body.setVelocity(ball, { x: 0, y: (100 / fps) * 5.5 });
+    ball = null;
+
+    nextFruitsImage.src = "assets/img/" + nextSize + ".png";
+    const nextFruitsImage_style_top = 10;
+    let maxHeight = parseInt(floor.style.height, nextFruitsImage_style_top) - nextFruitsImage_style_top;
+
+    if (nextSize * 20 <= maxHeight) {
+      nextFruitsImage.style.height = nextSize * 20 + "px";
+    } else {
+      nextFruitsImage.style.height = maxHeight + "px";
+    }
+    
+    newSize = nextBall();
+    addAnimationToNextFruitsImage();
+
+    setTimeout(() => createNewBall(newSize), 500);
+  }
+
+  function addAnimationToNextFruitsImage() {
+    if (!nextFruitsImage) return void 0;
+
+    // Reset the animation
+    nextFruitsImage.style.animation = 'none';
+    // Force a reflow, flushing the CSS changes
+    nextFruitsImage.offsetHeight; // jshint ignore:line
+    // Re-add the animation
+    nextFruitsImage.style.animation = "bounceAndGrow 0.3s";
+
+    // Reset the animation
+    floor.style.animation = 'none';
+    // Force a reflow, flushing the CSS changes
+    floor.offsetHeight; // jshint ignore:line
+    // Re-add the animation
+    floor.style.animation = "changeBackground 0.3s";
+  }
+
   addEventListener("touchend", () => {
     if (isGameOver) return;
 
     isClicking = false;
-
-    if (isGameOver) return;
-
-    if (ball != null) {
-      ball.createdAt = 0;
-      ball.collisionFilter = {
-        group: 0,
-        category: 1,
-        mask: -1,
-      };
-      Body.setVelocity(ball, { x: 0, y: (100 / fps) * 5.5 });
-      ball = null;
-
-      newSize = Math.ceil(Math.random() * 3);
-
-      setTimeout(() => createNewBall(newSize), 500);
-    }
+    handleBallInteraction();
   });
 
   addEventListener("mousemove", (e) => {
@@ -119,6 +152,7 @@
     const rect = canvas.getBoundingClientRect();
     mousePos = e.clientX / parent.style.zoom - rect.left;
   });
+
   addEventListener("touchmove", (e) => {
     if (isGameOver) return;
 
@@ -127,23 +161,19 @@
   });
 
   addEventListener("click", () => {
-    if (isGameOver || !isMouseOver) return;
+    if (!isMouseOver) return;
 
-    if (ball != null) {
-      ball.createdAt = 0;
-      ball.collisionFilter = {
-        group: 0,
-        category: 1,
-        mask: -1,
-      };
-      Body.setVelocity(ball, { x: 0, y: (100 / fps) * 5.5 });
-      ball = null;
-
-      newSize = Math.ceil(Math.random() * 3);
-
-      setTimeout(() => createNewBall(newSize), 500);
-    }
+    handleBallInteraction();
   });
+
+  function nextBall() {
+    let nextBall = nextSize;
+    // 次のフルーツはここで決まります。1~3のランダムな数字が入ります。
+    nextSize = Math.ceil(Math.random() * 3);
+    // nextSize = 7;  // テスト用
+    console.log("次のフルーツは" + nextBall + "です。");
+    return nextBall;
+  }
 
   canvas.addEventListener("mouseover", () => {
     isMouseOver = true;
@@ -192,6 +222,8 @@
           Math.abs(body.velocity.x) < 0.5 &&
           Math.abs(body.velocity.y) < 0.5
         ) {
+          // ゲームオーバー寸前の時の処理はここに記述されています。これは画面更新の度にコールされます。
+          console.log("ゲームオーバー寸前");
           isLineEnable = true;
         }
       }
@@ -211,6 +243,8 @@
 
       if (bodies[0].size === bodies[1].size) {
         allBodies = Composite.allBodies(engine.world);
+        // ここで同じサイズのフルーツが衝突した時の処理を記述します。
+        console.log(bodies[0].size + ", " + bodies[1].size + "が衝突しました。");
         if (allBodies.includes(bodies[0]) && allBodies.includes(bodies[1])) {
           if (
             (Date.now() - bodies[0].createdAt < 100 ||
@@ -251,7 +285,7 @@
       writeText("Game Over", "center", 240, 280, 50);
       writeText("Score: " + score, "center", 240, 320, 30);
     } else {
-      writeText(score, "start", 25, 60, 40);
+      writeText(score, "start", 25, 40, 40);
 
       if (isLineEnable) {
         ctx.strokeStyle = "#f55";
@@ -261,6 +295,8 @@
         ctx.stroke();
       }
     }
+    //writeText("つぎは：" + nextSize, "start", 25, 720, 20)
+
   });
 
   function writeText(text, textAlign, x, y, size) {
@@ -283,10 +319,9 @@
       parent.style.zoom = window.innerWidth / 480;
       parent.style.top = "0px";
 
-      floor.style.height = `${
-        (window.innerHeight - canvas.height * parent.style.zoom) /
+      floor.style.height = `${(window.innerHeight - canvas.height * parent.style.zoom) /
         parent.style.zoom
-      }px`;
+        }px`;
     } else {
       parent.style.zoom = window.innerHeight / 720 / 1.3;
       parent.style.top = `${(canvas.height * parent.style.zoom) / 15}px`;
