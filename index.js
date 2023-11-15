@@ -35,7 +35,7 @@
   let isClicking = false;
   let isMouseOver = false;
   let newSize = 1;
-  let nextSize = Math.ceil(Math.random() * 3);  // ネクストの実装にはこの変数を使います
+  let nextSize = Math.ceil(Math.random() * 3);
 
   let isGameOver = false;
   let score = 0;
@@ -106,6 +106,13 @@
     ball = null;
 
     newSize = nextBall();
+
+    addAnimationToNextFruitsImage();
+
+    setTimeout(() => createNewBall(newSize), 500);
+  }
+
+  function addAnimationToNextFruitsImage() {
     nextFruitsImage.src = "assets/img/" + nextSize + ".png";
     const nextFruitsImage_style_top = 10;
     let maxHeight = parseInt(floor.style.height, nextFruitsImage_style_top) - nextFruitsImage_style_top;
@@ -116,26 +123,11 @@
       nextFruitsImage.style.height = maxHeight + "px";
     }
 
-    addAnimationToNextFruitsImage();
-
-    setTimeout(() => createNewBall(newSize), 500);
-  }
-
-  function addAnimationToNextFruitsImage() {
-    if (!nextFruitsImage) return void 0;
-
-    // Reset the animation
     nextFruitsImage.style.animation = 'none';
-    // Force a reflow, flushing the CSS changes
-    nextFruitsImage.offsetHeight; // jshint ignore:line
-    // Re-add the animation
+    nextFruitsImage.offsetHeight;
     nextFruitsImage.style.animation = "bounceAndGrow 0.3s";
-
-    // Reset the animation
     floor.style.animation = 'none';
-    // Force a reflow, flushing the CSS changes
-    floor.offsetHeight; // jshint ignore:line
-    // Re-add the animation
+    floor.offsetHeight;
     floor.style.animation = "changeBackground 0.3s";
   }
 
@@ -168,10 +160,7 @@
 
   function nextBall() {
     let nextBall = nextSize;
-    // 次のフルーツはここで決まります。1~3のランダムな数字が入ります。
     nextSize = Math.ceil(Math.random() * 3);
-    // nextSize = 7;  // テスト用
-    console.log("次のフルーツは" + nextBall + "です。");
     return nextBall;
   }
 
@@ -222,8 +211,6 @@
           Math.abs(body.velocity.x) < 0.5 &&
           Math.abs(body.velocity.y) < 0.5
         ) {
-          // ゲームオーバー寸前の時の処理はここに記述されています。これは画面更新の度にコールされます。
-          console.log("ゲームオーバー寸前");
           isLineEnable = true;
         }
       }
@@ -243,8 +230,6 @@
 
       if (bodies[0].size === bodies[1].size) {
         allBodies = Composite.allBodies(engine.world);
-        // ここで同じサイズのフルーツが衝突した時の処理を記述します。
-        console.log(bodies[0].size + ", " + bodies[1].size + "が衝突しました。");
         if (allBodies.includes(bodies[0]) && allBodies.includes(bodies[1])) {
           if (
             (Date.now() - bodies[0].createdAt < 100 ||
@@ -295,8 +280,6 @@
         ctx.stroke();
       }
     }
-    //writeText("つぎは：" + nextSize, "start", 25, 720, 20)
-
   });
 
   function writeText(text, textAlign, x, y, size) {
@@ -361,6 +344,8 @@
     }
 
     createNewBall(1);
+    resize();
+    addAnimationToNextFruitsImage();
   }
 
   function gameOver() {
